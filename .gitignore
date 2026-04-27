@@ -1,0 +1,47 @@
+# === Python ===
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+.pytest_cache/
+
+# === Jupyter ===
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# === VSCode ===
+.vscode/
+*.code-workspace
+
+# === Datos pesados ===
+# Los CSV originales NO se suben (son grandes y los tiene Jacinto en el campus)
+data/raw/*.csv
+# Los datos procesados tampoco
+data/processed/*.csv
+data/processed/*.parquet
+data/processed/*.pkl
+
+# === Modelos entrenados ===
+models/*.h5
+models/*.keras
+models/*.pkl
+models/*.joblib
+
+# === Sistema ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Logs y temporales ===
+*.log
+*.tmp
+logs/
+tmp/
+
+# === Mantener carpetas vacías en git ===
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!models/.gitkeep
+!reports/figures/.gitkeep
