@@ -22,6 +22,7 @@ data/raw/*.csv
 data/processed/*.csv
 data/processed/*.parquet
 data/processed/*.pkl
+data/processed/*.json
 
 # === Modelos entrenados ===
 models/*.h5
