@@ -1,0 +1,45 @@
+{
+  "feature_names": [
+    "glucosa",
+    "colesterol",
+    "trigliceridos",
+    "hemoglobina",
+    "leucocitos",
+    "plaquetas",
+    "creatinina",
+    "mut_BRCA1",
+    "mut_TP53",
+    "mut_EGFR",
+    "mut_KRAS",
+    "mut_PIK3CA",
+    "mut_ALK",
+    "mut_BRAF",
+    "diabetes",
+    "hipertension",
+    "obesidad",
+    "epoc",
+    "fumador",
+    "actividad_fisica",
+    "edad"
+  ],
+  "n_features": 21,
+  "class_weights": {
+    "0": 0.6194763360039647,
+    "1": 2.5924645696508812
+  },
+  "random_state": 42,
+  "shapes": {
+    "X_train": [
+      30000,
+      21
+    ],
+    "X_val": [
+      10000,
+      21
+    ],
+    "X_test": [
+      10001,
+      21
+    ]
+  }
+}
