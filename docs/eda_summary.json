@@ -1,0 +1,62 @@
+{
+  "n_total": 50001,
+  "n_positivos": 9644,
+  "n_negativos": 40357,
+  "prevalencia": 0.1929,
+  "ratio_desbalance": 4.18,
+  "features_finales": [
+    "glucosa",
+    "colesterol",
+    "trigliceridos",
+    "hemoglobina",
+    "leucocitos",
+    "plaquetas",
+    "creatinina",
+    "mut_BRCA1",
+    "mut_TP53",
+    "mut_EGFR",
+    "mut_KRAS",
+    "mut_PIK3CA",
+    "mut_ALK",
+    "mut_BRAF",
+    "diabetes",
+    "hipertension",
+    "obesidad",
+    "epoc",
+    "fumador",
+    "actividad_fisica",
+    "edad"
+  ],
+  "n_features_finales": 21,
+  "target": "cancer",
+  "excluidas": {
+    "leakage": [
+      "coste_total",
+      "coste_farmaco",
+      "num_ingresos",
+      "dias_hospital",
+      "tipo_seguro",
+      "vive"
+    ],
+    "constante": [
+      "alcohol"
+    ],
+    "ruido": [
+      "enfermedad_cardiaca",
+      "asma"
+    ],
+    "sin_senal": [
+      "nivel_educativo",
+      "nivel_ingresos",
+      "zona",
+      "estado_civil",
+      "num_hijos",
+      "distancia_hospital_km"
+    ]
+  },
+  "mapeo_actividad_fisica": {
+    "Baja": 0,
+    "Moderada": 1,
+    "Alta": 2
+  }
+}
