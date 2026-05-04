@@ -33,4 +33,4 @@ for csv_path in csv_files:
     print(f"{csv_path.name:45s} → {df.shape[0]:>6} filas × {df.shape[1]:>3} columnas")
 
 print()
-print("Si ves 5 CSV listados arriba con sus dimensiones, todo OK.")
+print("Si ves 6 CSV listados arriba con sus dimensiones, todo OK.")
