@@ -1,0 +1,223 @@
+/* ============================================================ */
+/*  Sistema de Evaluación Oncológica — Hoja de estilos clínica  */
+/* ============================================================ */
+
+/* === Importar tipografía Inter (estándar en software médico) === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* === Aplicar Inter globalmente === */
+html, body, [class*="css"] {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* === Header de aplicación === */
+.app-header {
+    background: linear-gradient(135deg, #0066CC 0%, #004C99 100%);
+    color: white;
+    padding: 20px 28px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.15);
+}
+.app-header h1 {
+    color: white !important;
+    font-size: 1.6rem !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+    letter-spacing: -0.01em;
+}
+.app-header .subtitle {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.92rem;
+    margin-top: 4px;
+}
+
+/* === Tarjetas KPI === */
+.kpi-card {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 20px 22px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease;
+    height: 100%;
+}
+.kpi-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.kpi-label {
+    font-size: 0.78rem;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1A202C;
+    line-height: 1.1;
+    margin-bottom: 4px;
+}
+.kpi-delta {
+    font-size: 0.82rem;
+    color: #64748B;
+}
+.kpi-delta.positive { color: #10B981; }
+.kpi-delta.negative { color: #EF4444; }
+
+/* === Bloques de sección === */
+.section-block {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin-bottom: 20px;
+}
+.section-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1A202C;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #E2E8F0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* === Indicadores de riesgo === */
+.risk-indicator {
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 12px 0;
+    border-left: 4px solid;
+}
+.risk-alto {
+    background: #FEF2F2;
+    border-color: #DC2626;
+    color: #991B1B;
+}
+.risk-moderado {
+    background: #FFFBEB;
+    border-color: #F59E0B;
+    color: #92400E;
+}
+.risk-bajo {
+    background: #F0FDF4;
+    border-color: #10B981;
+    color: #065F46;
+}
+.risk-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+}
+.risk-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* === Etiquetas (chips) de factores de riesgo === */
+.factor-chip {
+    display: inline-block;
+    padding: 5px 11px;
+    margin: 3px;
+    border-radius: 16px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    border: 1px solid;
+}
+.chip-alta {
+    background: #FEE2E2;
+    border-color: #FCA5A5;
+    color: #991B1B;
+}
+.chip-media {
+    background: #FED7AA;
+    border-color: #FDBA74;
+    color: #9A3412;
+}
+.chip-baja {
+    background: #FEF3C7;
+    border-color: #FCD34D;
+    color: #92400E;
+}
+.chip-info {
+    background: #E0E7FF;
+    border-color: #A5B4FC;
+    color: #3730A3;
+}
+.chip-protector {
+    background: #D1FAE5;
+    border-color: #6EE7B7;
+    color: #065F46;
+}
+
+/* === Tabla de datos === */
+.dataframe {
+    font-size: 0.88rem !important;
+}
+
+/* === Sidebar === */
+[data-testid="stSidebar"] {
+    background: #FAFBFC;
+    border-right: 1px solid #E2E8F0;
+}
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    color: #1A202C !important;
+}
+
+/* === Botón principal === */
+.stButton > button[kind="primary"] {
+    background: #0066CC !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 500 !important;
+    padding: 10px 22px !important;
+    border-radius: 6px !important;
+    transition: background 0.15s !important;
+}
+.stButton > button[kind="primary"]:hover {
+    background: #004C99 !important;
+}
+
+/* === Quitar el "Made with Streamlit" del footer === */
+footer {
+    visibility: hidden;
+}
+#MainMenu {
+    visibility: hidden;
+}
+
+/* === Ajustes de tipografía general === */
+h1 { font-weight: 700 !important; color: #1A202C; }
+h2 { font-weight: 600 !important; color: #1A202C; font-size: 1.35rem !important; }
+h3 { font-weight: 600 !important; color: #2D3748; font-size: 1.1rem !important; }
+
+/* === Disclaimer médico === */
+.medical-disclaimer {
+    background: #FEF9C3;
+    border: 1px solid #FACC15;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    color: #713F12;
+    margin: 16px 0;
+}
+
+/* === Info card neutra === */
+.info-card {
+    background: #EFF6FF;
+    border-left: 3px solid #0066CC;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin: 12px 0;
+    font-size: 0.9rem;
+    color: #1E3A8A;
+}
