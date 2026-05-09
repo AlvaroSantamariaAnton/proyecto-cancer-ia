@@ -15,21 +15,6 @@ __pycache__/
 .vscode/
 *.code-workspace
 
-# === Datos pesados ===
-# Los CSV originales NO se suben (son grandes y los tiene Jacinto en el campus)
-data/raw/*.csv
-# Los datos procesados tampoco
-data/processed/*.csv
-data/processed/*.parquet
-data/processed/*.pkl
-data/processed/*.json
-
-# === Modelos entrenados ===
-models/*.h5
-models/*.keras
-models/*.pkl
-models/*.joblib
-
 # === Sistema ===
 .DS_Store
 Thumbs.db
