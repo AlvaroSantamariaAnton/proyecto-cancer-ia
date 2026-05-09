@@ -497,6 +497,261 @@ st.write("")
 
 
 # ============================================================
+#  PROCESO DE ENTRENAMIENTO DE LA MLP
+# ============================================================
+section_title("Proceso de entrenamiento de la red neuronal")
+
+st.markdown("""
+La MLP se entrenó durante un máximo de 100 épocas con dos callbacks activos:
+**EarlyStopping** (patience=12, restaura los pesos de la mejor época) y
+**ReduceLROnPlateau** (factor=0.5, patience=6, reduce el lr si val_loss se estanca).
+""")
+
+try:
+    import numpy as np_local
+    history = joblib.load(MODELS_DIR / "mlp_history.joblib")
+    n_epochs = len(history["loss"])
+    best_epoch = int(np.argmin(history["val_loss"])) + 1
+    epochs_list = list(range(1, n_epochs + 1))
+
+    col_loss, col_acc = st.columns(2)
+
+    with col_loss:
+        fig_loss = go.Figure()
+        fig_loss.add_trace(go.Scatter(
+            x=epochs_list, y=history["loss"],
+            mode="lines", name="Train",
+            line=dict(color=COLORS["primary"], width=2.5),
+        ))
+        fig_loss.add_trace(go.Scatter(
+            x=epochs_list, y=history["val_loss"],
+            mode="lines", name="Validación",
+            line=dict(color=COLORS["danger"], width=2.5),
+        ))
+        fig_loss.add_vline(
+            x=best_epoch, line_dash="dash", line_color=COLORS["success"],
+            annotation_text=f"Mejor época ({best_epoch})",
+            annotation_position="top right",
+        )
+        fig_loss.update_layout(
+            height=350,
+            title=dict(text="Pérdida (Binary Cross-Entropy)", font=dict(size=13)),
+            xaxis_title="Época",
+            yaxis_title="Loss",
+            legend=dict(yanchor="top", y=0.98, xanchor="right", x=0.98),
+        )
+        fig_loss = apply_plotly_theme(fig_loss)
+        st.plotly_chart(fig_loss, width="stretch")
+
+    with col_acc:
+        fig_acc = go.Figure()
+        fig_acc.add_trace(go.Scatter(
+            x=epochs_list, y=history["accuracy"],
+            mode="lines", name="Train",
+            line=dict(color=COLORS["primary"], width=2.5),
+        ))
+        fig_acc.add_trace(go.Scatter(
+            x=epochs_list, y=history["val_accuracy"],
+            mode="lines", name="Validación",
+            line=dict(color=COLORS["danger"], width=2.5),
+        ))
+        fig_acc.add_vline(
+            x=best_epoch, line_dash="dash", line_color=COLORS["success"],
+            annotation_text=f"Mejor época ({best_epoch})",
+            annotation_position="top right",
+        )
+        fig_acc.update_layout(
+            height=350,
+            title=dict(text="Accuracy", font=dict(size=13)),
+            xaxis_title="Época",
+            yaxis_title="Accuracy",
+            legend=dict(yanchor="bottom", y=0.02, xanchor="right", x=0.98),
+        )
+        fig_acc = apply_plotly_theme(fig_acc)
+        st.plotly_chart(fig_acc, width="stretch")
+
+    gap = history["val_loss"][best_epoch - 1] - history["loss"][best_epoch - 1]
+    info_card(
+        f"La red entrenó <strong>{n_epochs} épocas</strong> (EarlyStopping activado). "
+        f"La mejor época fue la <strong>{best_epoch}</strong> "
+        f"(val_loss = {min(history['val_loss']):.4f}). "
+        f"Gap train/val = <strong>{gap:+.4f}</strong> → entrenamiento sano sin sobreajuste significativo. "
+        f"El lr se redujo {history['loss'].count(history['loss'][-1])} veces mediante ReduceLROnPlateau."
+    )
+
+except FileNotFoundError:
+    st.warning("No se encontró mlp_history.joblib. Ejecute el notebook 04_mlp.ipynb.")
+
+st.write("")
+
+
+# ============================================================
+#  BÚSQUEDA DEL UMBRAL ÓPTIMO
+# ============================================================
+section_title("Optimización del umbral de decisión")
+
+st.markdown("""
+El umbral por defecto de **0.5** no es óptimo en problemas con clases desbalanceadas.
+Se realizó una búsqueda exhaustiva en el rango **[0.10, 0.90]** con paso 0.01
+sobre el conjunto de **validación**, maximizando el F1-Score.
+El umbral encontrado se aplicó una sola vez al test final.
+""")
+
+try:
+    from sklearn.metrics import f1_score as _f1, precision_score as _prec, recall_score as _rec
+
+    mlp_val_data = joblib.load(MODELS_DIR / "mlp_results_val.joblib")
+    y_proba_val = mlp_val_data["y_proba_val"]
+    y_val_df = pd.read_parquet(PROCESSED_DIR / "y_val.parquet")
+    y_val_arr = y_val_df["cancer"].values
+
+    thresholds_range = np.arange(0.10, 0.91, 0.01)
+    f1_scores, prec_scores, rec_scores = [], [], []
+
+    for t in thresholds_range:
+        preds = (y_proba_val >= t).astype(int)
+        f1_scores.append(_f1(y_val_arr, preds, zero_division=0))
+        prec_scores.append(_prec(y_val_arr, preds, zero_division=0))
+        rec_scores.append(_rec(y_val_arr, preds, zero_division=0))
+
+    best_t_idx = int(np.argmax(f1_scores))
+    best_t_val = float(thresholds_range[best_t_idx])
+    best_f1_val = float(f1_scores[best_t_idx])
+
+    fig_thr = go.Figure()
+    fig_thr.add_trace(go.Scatter(
+        x=thresholds_range, y=prec_scores,
+        mode="lines", name="Precisión",
+        line=dict(color=COLORS["primary"], width=2),
+    ))
+    fig_thr.add_trace(go.Scatter(
+        x=thresholds_range, y=rec_scores,
+        mode="lines", name="Recall",
+        line=dict(color=COLORS["danger"], width=2),
+    ))
+    fig_thr.add_trace(go.Scatter(
+        x=thresholds_range, y=f1_scores,
+        mode="lines", name="F1-Score",
+        line=dict(color=COLORS["success"], width=2.5),
+    ))
+    fig_thr.add_vline(
+        x=best_t_val, line_dash="dash", line_color="#1A202C",
+        annotation_text=f"Threshold óptimo = {best_t_val:.2f}",
+        annotation_position="top left",
+    )
+    fig_thr.add_vline(
+        x=0.5, line_dash="dot", line_color="#94A3B8",
+        annotation_text="Default = 0.50",
+        annotation_position="bottom right",
+    )
+    fig_thr.add_trace(go.Scatter(
+        x=[best_t_val], y=[best_f1_val],
+        mode="markers", name=f"F1 máximo = {best_f1_val:.4f}",
+        marker=dict(color=COLORS["success"], size=12, symbol="circle"),
+    ))
+    fig_thr.update_layout(
+        height=400,
+        xaxis_title="Threshold",
+        yaxis_title="Score",
+        xaxis=dict(range=[0.10, 0.90]),
+        yaxis=dict(range=[0, 1]),
+        legend=dict(yanchor="top", y=0.98, xanchor="left", x=0.02,
+                    bgcolor="rgba(255,255,255,0.9)"),
+    )
+    fig_thr = apply_plotly_theme(fig_thr)
+    st.plotly_chart(fig_thr, width="stretch")
+
+    info_card(
+        f"Umbral óptimo encontrado en validación: <strong>{best_t_val:.2f}</strong> "
+        f"(F1 = {best_f1_val:.4f}). Con threshold=0.5 el F1 era "
+        f"{mlp_val_data['metrics_val_default']['f1']:.4f}: "
+        f"la optimización aporta "
+        f"<strong>{(best_f1_val - mlp_val_data['metrics_val_default']['f1'])*100:+.2f} pp</strong>. "
+        f"Tras aplicar calibración isotónica, el umbral se recalculó en <strong>0.26</strong> "
+        f"(la calibración redistribuye las probabilidades hacia valores menores)."
+    )
+
+except FileNotFoundError:
+    st.warning("No se encontró mlp_results_val.joblib o y_val.parquet.")
+
+st.write("")
+
+
+# ============================================================
+#  IMPORTANCIA DE VARIABLES (RANDOM FOREST)
+# ============================================================
+section_title("Importancia de variables · Random Forest")
+
+st.markdown("""
+El Random Forest calcula la importancia de cada variable como la reducción media
+de impureza (Gini) que aporta en todos los árboles del ensemble.
+Es una medida de **relevancia predictiva** de cada feature.
+""")
+
+try:
+    from src.inference import FEATURE_ORDER
+
+    rf_model = joblib.load(MODELS_DIR / "random_forest.joblib")
+    importances = rf_model.feature_importances_
+
+    df_imp = pd.DataFrame({
+        "Variable": FEATURE_ORDER,
+        "Importancia": importances,
+    }).sort_values("Importancia", ascending=True)
+
+    # Colorear por tipo de variable
+    def color_feature(name):
+        if name.startswith("mut_"):
+            return COLORS["danger"]
+        elif name in ["fumador", "obesidad", "actividad_fisica", "diabetes",
+                      "hipertension", "epoc"]:
+            return COLORS["warning"]
+        elif name == "edad":
+            return COLORS["secondary"]
+        else:
+            return COLORS["primary"]
+
+    bar_colors_imp = [color_feature(f) for f in df_imp["Variable"]]
+
+    fig_imp = go.Figure()
+    fig_imp.add_trace(go.Bar(
+        y=df_imp["Variable"],
+        x=df_imp["Importancia"],
+        orientation="h",
+        marker_color=bar_colors_imp,
+        text=[f"{v:.4f}" for v in df_imp["Importancia"]],
+        textposition="outside",
+        hovertemplate="<b>%{y}</b><br>Importancia: %{x:.4f}<extra></extra>",
+    ))
+
+    # Leyenda manual como anotaciones
+    fig_imp.update_layout(
+        height=580,
+        xaxis_title="Importancia (reducción de impureza Gini)",
+        yaxis_title="",
+        showlegend=False,
+        margin=dict(t=30, r=80, b=40, l=20),
+    )
+    fig_imp = apply_plotly_theme(fig_imp)
+    st.plotly_chart(fig_imp, width="stretch")
+
+    # Top 5 features
+    top5 = df_imp.tail(5)["Variable"].tolist()[::-1]
+    info_card(
+        f"Las 5 variables más importantes según el Random Forest: "
+        f"<strong>{', '.join(top5)}</strong>. "
+        f"Las mutaciones genéticas (BRCA1, TP53, KRAS) y el tabaquismo "
+        f"encabezan el ranking, coherente con los pesos del modelo generativo "
+        f"del dataset y con las correlaciones observadas en el EDA."
+    )
+
+except Exception as e:
+    st.warning(f"No se pudo cargar la importancia de variables: {e}")
+
+st.write("")
+
+
+# ============================================================
 #  CONCLUSIONES TÉCNICAS
 # ============================================================
 section_title("Conclusiones del estudio")

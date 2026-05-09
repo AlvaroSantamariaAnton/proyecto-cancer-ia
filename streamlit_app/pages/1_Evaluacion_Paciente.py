@@ -470,26 +470,29 @@ if st.session_state["evaluated"]:
             normalized.append(0.5 + z * 0.15)  # multiplicador para amplitud visual
         return normalized
 
+    # Cerramos el polígono repitiendo el primer valor al final
+    theta_closed = radar_features + [radar_features[0]]
+
     fig_radar = go.Figure()
     fig_radar.add_trace(go.Scatterpolar(
-        r=normalize(media_no_cancer, radar_features),
-        theta=radar_features,
+        r=normalize(media_no_cancer, radar_features) + [normalize(media_no_cancer, radar_features)[0]],
+        theta=theta_closed,
         fill="toself",
         name="Población sin cáncer",
         line=dict(color=COLORS["success"]),
         fillcolor="rgba(16, 185, 129, 0.15)",
     ))
     fig_radar.add_trace(go.Scatterpolar(
-        r=normalize(media_cancer, radar_features),
-        theta=radar_features,
+        r=normalize(media_cancer, radar_features) + [normalize(media_cancer, radar_features)[0]],
+        theta=theta_closed,
         fill="toself",
         name="Población con cáncer",
         line=dict(color=COLORS["danger"]),
         fillcolor="rgba(220, 38, 38, 0.15)",
     ))
     fig_radar.add_trace(go.Scatterpolar(
-        r=normalize(paciente_vals, radar_features),
-        theta=radar_features,
+        r=normalize(paciente_vals, radar_features) + [normalize(paciente_vals, radar_features)[0]],
+        theta=theta_closed,
         fill="toself",
         name="Paciente",
         line=dict(color=COLORS["primary"], width=3),
