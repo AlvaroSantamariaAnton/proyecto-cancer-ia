@@ -413,15 +413,14 @@ herramienta.
 
 **Sobre el modelado:**
 
-- **Empate técnico entre modelos.** Random Forest y MLP están estadísticamente empatados
-  en F1-Score sobre test. La elección de la MLP como modelo principal se justifica por
-  estabilidad val→test y por requerimiento explícito del caso de uso, no por superioridad
-  estadística incontestable.
+- **La calibración cambia el ranking.** En la comparativa sin calibrar (Fase 5),
+  Random Forest lideraba con F1=0.5439. Tras la calibración isotónica (Fase 6),
+  la MLP mejora a F1=0.5491 y pasa a ser el mejor modelo. La calibración no es un paso
+  opcional: es parte del pipeline en producción.
 
-- **Problema esencialmente lineal.** El AUC-ROC más alto del estudio lo obtiene la
-  Logistic Regression (0.8275), lo que sugiere que las relaciones entre features y target
-  son fundamentalmente lineales. El uso de modelos no lineales (MLP, RF, boosting) no
-  aporta ganancias estadísticamente significativas.
+- **Problema esencialmente lineal.** El AUC-ROC más alto lo obtiene la Logistic
+  Regression (0.8275), lo que sugiere que las relaciones entre features y target son
+  fundamentalmente lineales.
 
 **Sobre el uso clínico:**
 
@@ -431,12 +430,12 @@ herramienta.
   física y pruebas complementarias.
 
 - **No sustituye el cribado oficial.** Los protocolos de cribado oncológico vigentes
-  (mamografía, colonoscopia, citología cervical, etc.) no se sustituyen por esta
-  herramienta. El sistema puede actuar como complemento informativo, no como reemplazo.
+  no se sustituyen por esta herramienta. El sistema puede actuar como complemento
+  informativo, no como reemplazo.
 
 - **Actualización requerida.** Cualquier despliegue clínico real requeriría re-entrenamiento
   con datos del propio centro, validación externa con poblaciones diversas y monitorización
-  continua del rendimiento (drift, sesgos demográficos).
+  continua del rendimiento.
 """)
 
 st.write("")

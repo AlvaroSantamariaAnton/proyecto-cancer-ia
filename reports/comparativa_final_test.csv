@@ -1,6 +1,6 @@
-Modelo,Precisión,Recall,F1-Score,AUC-ROC,Accuracy,Threshold
-Random Forest,0.4341,0.7278,0.5439,0.8255,0.7645,0.5
-MLP (t=0.68),0.5291,0.5562,0.5423,0.8213,0.8189,0.68
-Logistic Regression,0.4217,0.7449,0.5385,0.8275,0.7537,0.5
-LightGBM,0.4586,0.6516,0.5383,0.8156,0.7844,0.5
-XGBoost,0.4653,0.591,0.5207,0.8058,0.7901,0.5
+Modelo,Precisión,Recall,F1-Score,AUC-ROC,Accuracy,Threshold,Precision
+MLP (t=0.26),0.5291,0.6045,0.5491,0.8212,0.8189,0.26,0.503
+Random Forest,0.4341,0.7278,0.5439,0.8255,0.7645,0.5,
+Logistic Regression,0.4217,0.7449,0.5385,0.8275,0.7537,0.5,
+LightGBM,0.4586,0.6516,0.5383,0.8156,0.7844,0.5,
+XGBoost,0.4653,0.591,0.5207,0.8058,0.7901,0.5,

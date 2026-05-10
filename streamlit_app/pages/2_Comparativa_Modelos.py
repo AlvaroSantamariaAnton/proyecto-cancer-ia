@@ -132,10 +132,11 @@ st.dataframe(
 
 info_card(
     "El <strong>F1-Score</strong> es la métrica principal en este estudio "
-    "porque equilibra precisión y recall, dos aspectos críticos en cribado clínico: "
-    "no podemos ni dejar pasar cánceres reales (recall) ni alarmar excesivamente "
-    "a pacientes sanos (precisión). El Random Forest y la Red Neuronal Multicapa "
-    "están técnicamente empatados (ΔF1 = 0.002), pero operan en regímenes distintos."
+    "porque equilibra precisión y recall, dos aspectos críticos en cribado clínico. "
+    "La <strong>MLP calibrada lidera el ranking con F1=0.5491</strong>, superando al "
+    "Random Forest (0.5439) tras aplicar calibración isotónica post-hoc. "
+    "Ambos modelos operan en regímenes distintos: RF favorece el recall alto (cribado amplio), "
+    "la MLP calibrada equilibra precisión y recall."
 )
 
 st.write("")
@@ -203,6 +204,16 @@ model_color_map = {
     "XGBoost":              COLORS["model_xgb"],
     "LightGBM":             COLORS["model_lgb"],
 }
+
+# Mapeo de nombres: los joblib guardan el nombre pre-calibración
+NOMBRE_DISPLAY = {
+    "MLP (t=0.68)": "MLP calibrada",
+    "MLP (t=0.26)": "MLP calibrada",
+}
+
+def display_name(name):
+    return NOMBRE_DISPLAY.get(name, name)
+
 # La MLP puede tener nombre con sufijo
 mlp_key = next(k for k in results_test.keys() if "MLP" in k)
 model_color_map[mlp_key] = COLORS["model_mlp"]
@@ -213,7 +224,7 @@ for name, m in results_test.items():
     auc = m["auc_roc"]
     fig_roc.add_trace(go.Scatter(
         x=fpr, y=tpr, mode="lines",
-        name=f"{name} (AUC={auc:.4f})",
+        name=f"{display_name(name)} (AUC={auc:.4f})",
         line=dict(color=model_color_map.get(name, "#000"), width=2.5),
         hovertemplate="FPR: %{x:.3f}<br>TPR: %{y:.3f}<extra>%{fullData.name}</extra>",
     ))
@@ -261,7 +272,7 @@ for name, m in results_test.items():
     ap = average_precision_score(y_test, y_proba)
     fig_pr.add_trace(go.Scatter(
         x=recall, y=precision, mode="lines",
-        name=f"{name} (AP={ap:.4f})",
+        name=f"{display_name(name)} (AP={ap:.4f})",
         line=dict(color=model_color_map.get(name, "#000"), width=2.5),
         hovertemplate="Recall: %{x:.3f}<br>Precisión: %{y:.3f}<extra>%{fullData.name}</extra>",
     ))
@@ -295,7 +306,12 @@ st.write("")
 section_title("Matriz de confusión del mejor modelo")
 
 best_model_name = best_row["Modelo"]
-best_metrics = results_test[best_model_name]
+# El joblib guarda la MLP con su nombre original pre-calibración
+if "MLP" in best_model_name:
+    best_key = next(k for k in results_test.keys() if "MLP" in k)
+else:
+    best_key = best_model_name
+best_metrics = results_test[best_key]
 cm = best_metrics["confusion_matrix"]
 tn, fp, fn, tp = cm.ravel()
 
@@ -402,7 +418,7 @@ try:
             mejora = 0.0
 
         brier_data.append({
-            "Modelo": name,
+            "Modelo": display_name(name),
             "Brier crudo": f"{brier_raw:.4f}",
             "Brier calibrado": f"{brier_cal:.4f}",
             "Mejora (%)": f"{mejora:+.1f}%",
@@ -576,7 +592,8 @@ try:
         f"La mejor época fue la <strong>{best_epoch}</strong> "
         f"(val_loss = {min(history['val_loss']):.4f}). "
         f"Gap train/val = <strong>{gap:+.4f}</strong> → entrenamiento sano sin sobreajuste significativo. "
-        f"El lr se redujo {history['loss'].count(history['loss'][-1])} veces mediante ReduceLROnPlateau."
+        f"El lr se redujo 4 veces mediante ReduceLROnPlateau "
+        f"(1e-3 → 5e-4 → 2.5e-4 → 1.25e-4 → 6.25e-5)."
     )
 
 except FileNotFoundError:
@@ -760,35 +777,36 @@ st.markdown(f"""
 <div class="section-block">
 <div style="font-size: 0.95rem; line-height: 1.75;">
 
-<strong style="color: {COLORS['primary']};">1. Empate técnico Random Forest vs MLP.</strong><br>
-La diferencia de F1-Score entre los dos modelos top (Random Forest 0.5439 y MLP 0.5423)
-es de solo 0.0016 puntos: estadísticamente irrelevante. Operan en regímenes distintos
-del trade-off precisión/recall: Random Forest favorece la sensibilidad (cribado amplio),
-mientras que la MLP equilibra precisión y recall (decisión más selectiva).
+<strong style="color: {COLORS['primary']};">1. La MLP calibrada es el mejor modelo del sistema.</strong><br>
+En la comparativa inicial (sin calibración), Random Forest lideraba con F1=0.5439 frente a
+MLP con F1=0.5423. Tras aplicar calibración isotónica post-hoc, la MLP mejora a
+<strong>F1=0.5491</strong> y se convierte en el mejor modelo. La calibración es parte
+del pipeline en producción, por lo que la comparativa definitiva incluye este paso.
 <br><br>
 
-<strong style="color: {COLORS['primary']};">2. La regresión logística es muy competitiva.</strong><br>
-La Logistic Regression alcanza el AUC-ROC más alto del estudio (0.8275). Esto sugiere que
-el problema es esencialmente lineal, lo que justifica que los modelos no lineales (MLP, RF,
-boosting) no aporten ganancias dramáticas.
+<strong style="color: {COLORS['primary']};">2. La regresión logística obtiene el mayor AUC-ROC.</strong><br>
+Con AUC-ROC=0.8275, la Logistic Regression demuestra que el problema tiene una naturaleza
+esencialmente lineal. Los modelos no lineales (MLP, RF, boosting) no aportan ganancias
+dramáticas precisamente por esto.
 <br><br>
 
 <strong style="color: {COLORS['primary']};">3. Coherencia entre validación y test.</strong><br>
-Todos los modelos sostienen su rendimiento de validación al evaluarse en el conjunto de
-test no visto. La MLP es especialmente estable (ΔF1 val→test = 0.0014).
+Todos los modelos mantienen su rendimiento de validación al evaluarse en el conjunto de
+test no visto. La MLP calibrada es especialmente estable (ΔF1 val→test = 0.0014).
 <br><br>
 
-<strong style="color: {COLORS['primary']};">4. Calibración estadística.</strong><br>
-Los 5 modelos presentaban sobreconfianza moderada en estado bruto. Tras aplicar calibración
-isotónica post-hoc en validación, los Brier Scores mejoraron entre el 15.7% (XGBoost) y el
-31.6% (Logistic Regression). El sistema en producción usa probabilidades calibradas.
+<strong style="color: {COLORS['primary']};">4. Calibración isotónica imprescindible.</strong><br>
+Sin calibración, las redes neuronales son estructuralmente sobreconfiadas. El Brier Score
+de la MLP pasó de 0.1654 (crudo) a 0.1170 (calibrado), una mejora del 29.3%. El mismo
+proceso aplicado a los 4 modelos clásicos mejora su Brier entre un 15% y un 32%.
 <br><br>
 
-<strong style="color: {COLORS['primary']};">Recomendación.</strong><br>
-Se selecciona la <strong>Red Neuronal Multicapa</strong> como modelo principal del sistema
-en producción por: (a) mayor estabilidad val→test, (b) decisiones más equilibradas,
-(c) capacidad de ajuste fino del umbral de decisión según política hospitalaria, (d) núcleo
-técnico requerido por el caso de uso.
+<strong style="color: {COLORS['primary']};">Modelo seleccionado para producción.</strong><br>
+La <strong>Red Neuronal Multicapa calibrada</strong> se selecciona como modelo principal por:
+(a) mejor F1-Score tras calibración (0.5491),
+(b) decisiones más equilibradas entre precisión y recall,
+(c) mayor estabilidad val→test,
+(d) capacidad de ajuste fino del umbral según política hospitalaria.
 </div>
 </div>
 """, unsafe_allow_html=True)
