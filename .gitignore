@@ -1,33 +1,15 @@
-# === Python ===
+# Entorno
 venv/
+.venv/
 __pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-.Python
-.pytest_cache/
-
-# === Jupyter ===
+*.pyc
 .ipynb_checkpoints/
-*.ipynb_checkpoints
-
-# === VSCode ===
 .vscode/
-*.code-workspace
-
-# === Sistema ===
 .DS_Store
 Thumbs.db
-desktop.ini
 
-# === Logs y temporales ===
-*.log
-*.tmp
-logs/
-tmp/
+# Datos crudos (grandes y no necesarios para la app)
+data/raw/
 
-# === Mantener carpetas vacías en git ===
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!models/.gitkeep
-!reports/figures/.gitkeep
+# Figuras PNG (la app usa Plotly)
+reports/figures/

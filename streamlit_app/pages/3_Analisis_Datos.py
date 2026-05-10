@@ -47,6 +47,7 @@ load_css()
 # ============================================================
 DOCS_DIR = PROJECT_ROOT / "docs"
 DATA_DIR = PROJECT_ROOT / "data" / "raw"
+PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 
 
 @st.cache_data
@@ -57,9 +58,8 @@ def load_eda_summary():
 
 @st.cache_data
 def load_master_dataset():
-    """Carga el dataset maestro mergeado para análisis."""
-    from src.data_loader import load_master_dataset as _load
-    return _load()
+    """Carga el dataset maestro desde el parquet procesado."""
+    return pd.read_parquet(PROCESSED_DIR / "master_dataset.parquet")
 
 
 eda = load_eda_summary()
