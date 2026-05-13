@@ -105,6 +105,13 @@ proyecto-cancer-ia/
 
 ---
 
+## Requisitos previos
+
+- Python 3.12.x (obligatorio)
+- TensorFlow 2.21.0 no es compatible con Python 3.13 ni 3.14.
+
+---
+
 ## Instalación
 
 ```bash
